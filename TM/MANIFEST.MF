@@ -1,0 +1,3 @@
+Manifest-Version: 1.0 
+Class-Path: lib/javatuples-1.2.jar 
+Main-Class: File 
