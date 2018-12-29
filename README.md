@@ -115,9 +115,8 @@
 
 ### 任务三：图灵机程序
 
-使用下文 ***[Section 2](#2-图灵机程序语法 )*** 中描述的图灵机程序语法，实现**两个**图灵机对应的图灵机程序:
-1. ![](http://chart.googleapis.com/chart?cht=tx&chl=L_1 = \{1^{m} \times 1^{n} = 1^{mn}\ |\ m, n \in \mathbb{N}^{+}\}) (e.g. ![](http://chart.googleapis.com/chart?cht=tx&chl=11 \times 111 = 111111 \in L_1), but ![](http://chart.googleapis.com/chart?cht=tx&chl=1 \times 1 = 11 \notin L_1))
-2. ![](http://chart.googleapis.com/chart?cht=tx&chl=L_2 = \{ww\ |\ w \in \{a,b\}^{*}\})
+使用下文 ***[Section 2](#2-图灵机程序语法 )*** 中描述的图灵机程序语法，实现**两个**图灵机语言对应的图灵机程序:
+<p align="center"><img src="./assets/L.gif"/></p>
 
 实现要求：
 1. 将图灵机实现为一个判定器，即判定一个输入串是否在图灵机描述的语言中；
