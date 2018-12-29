@@ -14,23 +14,22 @@ public class FileHandle {
 	
 	public static final String inputFilePath = "inputs" + File.separator;
 	public static final String outputFilePath = "outputs" + File.separator;
-	
-	//public static final String inputFilePath = "";
-	//public static final String outputFilePath = "";
+	public static String caseDirectory = "";
 	
 	public static void main(String[] args) {
-		try {
-			System.setOut(new PrintStream(new FileOutputStream(outputFilePath.concat("console.txt"))));
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		if(args.length > 1)
+			System.out.println("more than one args, error return");
 		
-		String tmFileName = inputFilePath.concat(args[0]);//"palindrome_detector.tm";
+		caseDirectory = caseDirectory.concat(args[0]).concat(File.separator);
+		//caseDirectory = "case-directory/case2/";
+		String tmFileName = caseDirectory.concat("test.tm");
 		List<String> lines = readTMFile(tmFileName);
 		Solver solver = new Solver(lines);
 		
-		String inputFileName = inputFilePath.concat(args[1]);//"input.txt";
+		//consoleInputTest(solver);
+		setConsoleFile(caseDirectory.concat("console.txt"));
+		
+		String inputFileName = caseDirectory.concat("input.txt");
 		List<String> inputs = readInputFile(inputFileName);
 		
 		List<String> outputs = new ArrayList<String>();
@@ -39,9 +38,10 @@ public class FileHandle {
 		String result = "";
 		for(String output: outputs)
 			result = result.concat(output).concat("\n");
+		result = result.substring(0,result.length()-1);
 		
 		try {
-			FileOutputStream outputStream = new FileOutputStream(outputFilePath.concat("result.txt"));
+			FileOutputStream outputStream = new FileOutputStream(caseDirectory.concat("result.txt"));
 			outputStream.write(result.getBytes(), 0, result.length());;
 		}catch (IOException e) {
 			e.printStackTrace();
@@ -58,8 +58,17 @@ public class FileHandle {
 		}
 	}
 	
+	private static void setConsoleFile(String filename) {
+		try {
+			System.setOut(new PrintStream(new FileOutputStream(filename)));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	private static String run(Solver solver, String input) {
-		System.out.print("Input: " + input);
+		System.out.println("Input: " + input);
 		boolean breakFlag = false;
 		for(int i = 0; i<input.length(); i++)
 			if(!solver.inputSymbolSatisfied(input.charAt(i))) {
@@ -79,8 +88,11 @@ public class FileHandle {
 			System.out.println("Result: "+simu.result);
 			System.out.println("==================== END ====================");
 			System.out.println();
+			if(simu.isAccept == true)
+				return "True";
+			else return "False";
 		}
-		return "False";
+		//return "False";
 	}
 	
 	private static List<String> readTMFile(String fileName) {

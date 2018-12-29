@@ -8,7 +8,8 @@ import java.util.Set;
 
 public class Solver {
 
-	public List<String> lines = new ArrayList<>();
+	private List<String> lines = new ArrayList<>();
+	private List<String> transFuncStrs = new ArrayList<>();
 	private Map<String,State> states = new LinkedHashMap<>();
 	private Set<Character> inputSymbols = new HashSet<>();
 	private Set<Character> tapeSymbols = new HashSet<>();
@@ -36,7 +37,35 @@ public class Solver {
 	}
 	
 	private void readDefinition() throws Exception{
-		String statesStr[] = splitString(0,"#Q",'{','}',",");
+		int defCount = 0;
+		
+		for(String line : lines) {
+			if(line.length()>=2 && line.startsWith("#")) {
+				char mark = line.charAt(1);
+				switch(mark) {
+					case 'Q':readQ(line);break;
+					case 'S':readS(line);break;
+					case 'T':readT(line);break;
+					case 'q':readq0(line);break;
+					case 'B':readB(line);break;
+					case 'F':readF(line);break;
+					default:
+						throw new Exception("undefined #?");
+				}
+				defCount++;
+			}
+			else transFuncStrs.add(line);
+		}
+		
+		if(defCount != 6)
+			throw new Exception("definition count line do not equal six");
+		
+		if(!checkInputAndTapeSymbols())
+			throw new Exception("input and tape symbols set not satisfied");
+	}
+	
+	private void readQ(String line) throws Exception {
+		String statesStr[] = splitString(line,'{','}',",");
 		if(statesStr != null) {
 			for(int i = 0; i<statesStr.length;i++) {
 				String tempStr = statesStr[i];
@@ -45,8 +74,10 @@ public class Solver {
 			}
 		}
 		else throw new Exception("statesStr analysis error");
-		
-		String inputSymbolsStr[] = splitString(1,"#S",'{','}',",");
+	}
+	
+	private void readS(String line) throws Exception {
+		String inputSymbolsStr[] = splitString(line,'{','}',",");
 		if(inputSymbolsStr != null) {
 			for(int i = 0; i<inputSymbolsStr.length; i++) {
 				String tempStr = inputSymbolsStr[i];
@@ -57,8 +88,10 @@ public class Solver {
 			}
 		}
 		else throw new Exception("inputSymbolsStr analysis error");
-		
-		String tapeSymbolsStr[] = splitString(2,"#T",'{','}',",");
+	}
+
+	private void readT(String line) throws Exception {
+		String tapeSymbolsStr[] = splitString(line,'{','}',",");
 		if(tapeSymbolsStr != null) {
 			for(int i = 0; i<tapeSymbolsStr.length; i++) {
 				String tempStr = tapeSymbolsStr[i];
@@ -69,25 +102,28 @@ public class Solver {
 			}
 		}
 		else throw new Exception("tapeSymbolsStr analysis error");
-		
-		if(!checkInputAndTapeSymbols())
-			throw new Exception("input and tape symbols set not satisfied");
-		
-		String startStateStr = lines.get(3);
+	}
+	
+	private void readq0(String line) throws Exception {
+		String startStateStr = line;
 		if(startStateStr.startsWith("#q0")) {
 			startStateStr = startStateStr.substring(startStateStr.indexOf("=")+2,startStateStr.length());
 			states.get(startStateStr).isStart = true;
 		}
 		else throw new Exception("startStateStr analysis error");
-		
-		String blankSymbolStr = lines.get(4);
+	}
+
+	private void readB(String line) throws Exception {
+		String blankSymbolStr = line;
 		if(blankSymbolStr.startsWith("#B")) {
 			char tempBlankSymbol = blankSymbolStr.charAt(blankSymbolStr.indexOf("=")+2);
 			blankSymbol = tempBlankSymbol;
 		}
 		else throw new Exception("blankSymbolStr analysis error");
-		
-		String finalStatesStr[] = splitString(5,"#F",'{','}',",");
+	}
+	
+	private void readF(String line) throws Exception {
+		String finalStatesStr[] = splitString(line,'{','}',",");
 		if(finalStatesStr != null) {
 			for(int i = 0; i<finalStatesStr.length; i++) {
 				String tempStr = finalStatesStr[i];
@@ -99,10 +135,7 @@ public class Solver {
 		else throw new Exception("finalStatesStr analysis error");
 	}
 	
-	private String[] splitString(int index, String startWith, char leftSymbol,char RightSymbol, String splitSymbol) {
-		String str = lines.get(index);
-		if(!str.startsWith(startWith))
-			return null;
+	private String[] splitString(String str, char leftSymbol, char RightSymbol, String splitSymbol) {
 		int leftIndex = str.indexOf(leftSymbol);
 		int rightIndex = str.indexOf(RightSymbol);
 		str = str.substring(leftIndex+1, rightIndex);
@@ -117,8 +150,7 @@ public class Solver {
 	}
 	
 	private void readTransFunc() throws Exception{
-		for(int i = 6; i<lines.size(); i++) {
-			String line = lines.get(i);
+		for(String line : transFuncStrs) {
 			String strs[] = line.split(" ");
 			if(strs.length != 5)
 				throw new Exception("transFunc format error");
@@ -127,7 +159,7 @@ public class Solver {
 			else if(!states.containsKey(strs[4]))
 				throw new Exception("transFunc final state error");
 			else if (!states.get(strs[0]).addTransFunc(this,strs))
-				throw new Exception("transFunc add error");
+				throw new Exception("transFunc("+line+") add error, maybe symbol problem");
 		}
 	}
 	
